@@ -148,16 +148,16 @@ export const TaskManager = () => {
       {/* Task CRUD Table */}
       <div className="glass-panel rounded-3xl border border-dark-border overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-dark-bg/80 border-b border-dark-border text-gray-400 font-bold uppercase tracking-wider">
+          <table className="w-full text-left text-xs min-w-[900px]">
+            <thead className="bg-dark-bg/90 border-b border-dark-border text-gray-400 font-bold uppercase tracking-wider">
               <tr>
-                <th className="py-4 px-5">Habit Target</th>
-                <th className="py-4 px-5">Category</th>
-                <th className="py-4 px-5">Assigned Target</th>
-                <th className="py-4 px-5">Target Steps/Value</th>
-                <th className="py-4 px-5">Difficulty & XP</th>
-                <th className="py-4 px-5">Proof Mode</th>
-                <th className="py-4 px-5 text-right">Actions</th>
+                <th className="py-3.5 px-4">Habit Target</th>
+                <th className="py-3.5 px-3">Category</th>
+                <th className="py-3.5 px-3">Assigned Target</th>
+                <th className="py-3.5 px-3">Target Steps/Value</th>
+                <th className="py-3.5 px-3">Difficulty & XP</th>
+                <th className="py-3.5 px-3">Proof Mode</th>
+                <th className="py-3.5 px-4 text-center sticky right-0 bg-dark-bg/95 shadow-md border-l border-dark-border/80">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-dark-border/60">
@@ -169,25 +169,25 @@ export const TaskManager = () => {
                   <tr key={t.id} className="hover:bg-dark-card/60 transition-colors">
                     
                     {/* Habit Info */}
-                    <td className="py-4 px-5">
+                    <td className="py-3.5 px-4">
                       <div className="flex items-center space-x-3">
-                        <div className="w-9 h-9 rounded-xl bg-orange-fire/10 border border-orange-fire/30 flex items-center justify-center text-orange-fire">
+                        <div className="w-8 h-8 rounded-xl bg-orange-fire/10 border border-orange-fire/30 flex items-center justify-center text-orange-fire shrink-0">
                           <IconComp className="w-4 h-4" />
                         </div>
                         <div>
                           <div className="font-extrabold text-white text-sm">{t.title}</div>
-                          <div className="text-[11px] text-gray-400 font-medium truncate max-w-xs">{t.description}</div>
+                          <div className="text-[11px] text-gray-400 font-medium truncate max-w-[180px]">{t.description}</div>
                         </div>
                       </div>
                     </td>
 
                     {/* Category */}
-                    <td className="py-4 px-5 font-bold text-gray-300">
+                    <td className="py-3.5 px-3 font-bold text-gray-300">
                       {t.category}
                     </td>
 
                     {/* Assigned Recipient Badge */}
-                    <td className="py-4 px-5">
+                    <td className="py-3.5 px-3">
                       <span className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${
                         t.assignedTo === 'all' || !t.assignedTo
                           ? 'bg-cyan-glow/10 text-cyan-glow border-cyan-glow/30'
@@ -198,17 +198,17 @@ export const TaskManager = () => {
                     </td>
 
                     {/* Target Steps / Threshold */}
-                    <td className="py-4 px-5 font-semibold text-gray-200">
+                    <td className="py-3.5 px-3 font-semibold text-gray-200">
                       {t.targetValue} {t.unit}
                     </td>
 
                     {/* Difficulty Badge (Calculated XP) */}
-                    <td className="py-4 px-5">
+                    <td className="py-3.5 px-3">
                       {getDifficultyBadge(t.difficulty || 'Medium')}
                     </td>
 
                     {/* Proof Toggle */}
-                    <td className="py-4 px-5">
+                    <td className="py-3.5 px-3">
                       {t.requiresProof ? (
                         <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/40 text-[10px] font-extrabold">
                           <Camera className="w-3 h-3" />
@@ -221,23 +221,25 @@ export const TaskManager = () => {
                       )}
                     </td>
 
-                    {/* Edit & Delete Actions */}
-                    <td className="py-4 px-5 text-right">
-                      <div className="flex items-center justify-end space-x-2">
+                    {/* Edit & Delete Actions (Sticky Right) */}
+                    <td className="py-3.5 px-4 text-center sticky right-0 bg-dark-bg/95 border-l border-dark-border/80">
+                      <div className="flex items-center justify-center space-x-2">
                         <button
                           onClick={() => handleOpenEdit(t)}
-                          className="p-2 rounded-xl bg-cyan-glow/10 border border-cyan-glow/30 text-cyan-glow hover:bg-cyan-glow/20 transition-all"
+                          className="px-2.5 py-1.5 rounded-xl bg-cyan-glow/15 border border-cyan-glow/40 text-cyan-glow hover:bg-cyan-glow/25 transition-all text-xs font-bold flex items-center space-x-1"
                           title="Edit Task Settings"
                         >
-                          <Edit2 className="w-4 h-4" />
+                          <Edit2 className="w-3.5 h-3.5" />
+                          <span>Edit</span>
                         </button>
 
                         <button
                           onClick={() => deleteTask(t.id)}
-                          className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-500/25 transition-all"
+                          className="px-2.5 py-1.5 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-400 hover:bg-rose-500/25 transition-all text-xs font-bold flex items-center space-x-1"
                           title="Delete Task"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Delete</span>
                         </button>
                       </div>
                     </td>
