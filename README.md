@@ -1,4 +1,4 @@
-# 🔥 NewYou — Gamified Routine Tracker & Admin Command Center
+# NewYou - Gamified Routine Tracker & Admin Command Center
 
 ![NewYou Platform](public/favicon.svg)
 
