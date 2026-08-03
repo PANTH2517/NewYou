@@ -19,6 +19,7 @@ export const LoginScreen = () => {
     loginWithGoogle,
     loginWithEmail,
     registerWithEmail,
+    registerUserInMongoDB,
     setUser,
     setAdmin,
     setRole,
@@ -62,6 +63,13 @@ export const LoginScreen = () => {
         const cleanMsg = result.error.replace('Firebase: ', '').replace(/auth\//g, '').replace(/-/g, ' ');
         setErrorMessage(cleanMsg);
       }
+    } else if (result.user) {
+      registerUserInMongoDB({
+        id: result.user.uid,
+        email: result.user.email,
+        name: result.user.displayName || result.user.email.split('@')[0],
+        role: result.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user'
+      });
     }
   };
 
@@ -81,6 +89,13 @@ export const LoginScreen = () => {
         const cleanMsg = result.error.replace('Firebase: ', '').replace(/auth\//g, '').replace(/-/g, ' ');
         setErrorMessage(cleanMsg);
       }
+    } else if (result.user) {
+      registerUserInMongoDB({
+        id: result.user.uid,
+        email: result.user.email,
+        name: result.user.displayName || result.user.email.split('@')[0],
+        role: result.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user'
+      });
     }
   };
 
@@ -89,13 +104,23 @@ export const LoginScreen = () => {
     const inputEmail = email.trim() || "alex.vance@newself.app";
     const isAdmin = inputEmail.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
+    const userPayload = {
+      id: `user-${Date.now()}`,
+      email: inputEmail,
+      name: inputEmail.split('@')[0],
+      handle: `@${inputEmail.split('@')[0]}`,
+      role: isAdmin ? 'admin' : 'user'
+    };
+
+    registerUserInMongoDB(userPayload);
+
     if (isAdmin) {
       setRole('admin');
-      setAdmin(prev => ({ ...prev, name: 'Admin Commander', handle: `@${inputEmail.split('@')[0]}` }));
+      setAdmin(prev => ({ ...prev, name: userPayload.name, handle: userPayload.handle }));
       showToast(`Signed in as Admin (${inputEmail})`, 'success');
     } else {
       setRole('user');
-      setUser(prev => ({ ...prev, name: inputEmail.split('@')[0], handle: `@${inputEmail.split('@')[0]}` }));
+      setUser(prev => ({ ...prev, name: userPayload.name, handle: userPayload.handle }));
       showToast(`Signed in as ${inputEmail}`, 'success');
     }
   };

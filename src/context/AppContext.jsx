@@ -257,6 +257,27 @@ export const AppProvider = ({ children }) => {
     );
   };
 
+  // Helper to sync user profile directly to MongoDB Atlas
+  const registerUserInMongoDB = async (userData) => {
+    if (!userData || !userData.email) return;
+    const userObj = {
+      id: userData.id || userData.uid || `user-${Date.now()}`,
+      email: userData.email,
+      name: userData.name || userData.email.split('@')[0],
+      handle: userData.handle || `@${userData.email.split('@')[0]}`,
+      role: userData.role || 'user',
+      avatar: userData.avatar || null,
+      level: userData.level || 1,
+      title: userData.title || 'Novice Initiated',
+      xp: userData.xp || 0,
+      nextLevelXp: userData.nextLevelXp || 250,
+      streak: userData.streak || 0,
+      highestStreak: userData.highestStreak || 0
+    };
+    setRegisteredUsers(prev => [userObj, ...prev.filter(u => u.email !== userObj.email && u.id !== userObj.id)]);
+    await apiSaveUser(userObj);
+  };
+
   // Listen to Real-Time Firebase Auth & Firestore Sync
   useEffect(() => {
     if (!auth) {
@@ -276,6 +297,7 @@ export const AppProvider = ({ children }) => {
             setCurrentUserRole('admin');
             setRole('admin');
             const adminData = {
+              id: fbUser.uid,
               name: fbUser.displayName || fbUser.email || 'Admin Commander',
               avatar: fbUser.photoURL || admin.avatar,
               role: 'admin',
@@ -283,11 +305,13 @@ export const AppProvider = ({ children }) => {
             };
             setAdmin(prev => ({ ...prev, ...adminData }));
             saveUserProfileToCloud(fbUser.uid, adminData);
+            registerUserInMongoDB(adminData);
             showToast(`Authenticated as Admin Portal (${fbUser.email})`, 'success');
           } else {
             setCurrentUserRole('user');
             setRole('user');
             const userData = {
+              id: fbUser.uid,
               name: fbUser.displayName || (fbUser.email ? fbUser.email.split('@')[0] : 'Member User'),
               handle: `@${(fbUser.email || 'user').split('@')[0]}`,
               avatar: fbUser.photoURL || user.avatar,
@@ -296,7 +320,7 @@ export const AppProvider = ({ children }) => {
             };
             setUser(prev => ({ ...prev, ...userData }));
             saveUserProfileToCloud(fbUser.uid, userData);
-            apiSaveUser({ id: fbUser.uid, ...userData });
+            registerUserInMongoDB(userData);
             setActiveTab('dashboard');
             showToast(`Authenticated as Routine Member (${fbUser.email})`, 'success');
           }
@@ -815,6 +839,7 @@ export const AppProvider = ({ children }) => {
         updateTask,
         deleteTask,
         clearAllData,
+        registerUserInMongoDB,
         dailyProgressPercent,
         completedCount,
         totalTasks,
