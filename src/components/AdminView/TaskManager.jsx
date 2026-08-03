@@ -17,9 +17,10 @@ const ICON_MAP = {
 const AVAILABLE_ICONS = ['Footprints', 'Utensils', 'Droplets', 'BookOpen', 'Brain', 'Code', 'Zap'];
 
 export const TaskManager = () => {
-  const { tasks, addNewTask, deleteTask, proofs, user, currentUser } = useApp();
+  const { tasks, addNewTask, updateTask, deleteTask, proofs, user, currentUser, registeredUsers } = useApp();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     category: 'Fitness',
@@ -33,10 +34,11 @@ export const TaskManager = () => {
   });
 
   const registeredMembers = Array.from(new Set([
+    ...registeredUsers.map(u => u.email || u.handle || u.name).filter(Boolean),
     ...(currentUser?.email ? [currentUser.email] : []),
     ...(user?.email ? [user.email] : []),
     ...proofs.map(p => p.userName || p.userEmail).filter(Boolean)
-  ])).filter(email => email && !email.toLowerCase().includes('admin'));
+  ])).filter(email => email && !email.toLowerCase().includes('admin') && email.toLowerCase() !== 'demo');
 
   const memberOptions = [
     { value: 'all', label: '🌐 All Members (Global System Task)' },
@@ -46,11 +48,49 @@ export const TaskManager = () => {
     }))
   ];
 
+  const handleOpenCreate = () => {
+    setEditingTask(null);
+    setFormData({
+      title: '',
+      category: 'Fitness',
+      difficulty: 'Medium',
+      assignedTo: 'all',
+      targetValue: 10,
+      unit: 'times',
+      icon: 'Zap',
+      requiresProof: true,
+      description: '',
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (t) => {
+    setEditingTask(t);
+    setFormData({
+      title: t.title || '',
+      category: t.category || 'Fitness',
+      difficulty: t.difficulty || 'Medium',
+      assignedTo: t.assignedTo || 'all',
+      targetValue: t.targetValue || 10,
+      unit: t.unit || 'times',
+      icon: t.icon || 'Zap',
+      requiresProof: t.requiresProof ?? true,
+      description: t.description || '',
+    });
+    setIsModalOpen(true);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.title.trim()) return;
 
-    addNewTask(formData);
+    if (editingTask) {
+      updateTask(editingTask.id, formData);
+    } else {
+      addNewTask(formData);
+    }
+
+    setEditingTask(null);
     setFormData({
       title: '',
       category: 'Fitness',
@@ -181,15 +221,25 @@ export const TaskManager = () => {
                       )}
                     </td>
 
-                    {/* Delete Action */}
+                    {/* Edit & Delete Actions */}
                     <td className="py-4 px-5 text-right">
-                      <button
-                        onClick={() => deleteTask(t.id)}
-                        className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-500/25 transition-all"
-                        title="Delete Task"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center justify-end space-x-2">
+                        <button
+                          onClick={() => handleOpenEdit(t)}
+                          className="p-2 rounded-xl bg-cyan-glow/10 border border-cyan-glow/30 text-cyan-glow hover:bg-cyan-glow/20 transition-all"
+                          title="Edit Task Settings"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          onClick={() => deleteTask(t.id)}
+                          className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-500/25 transition-all"
+                          title="Delete Task"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
 
                   </tr>
@@ -200,12 +250,14 @@ export const TaskManager = () => {
         </div>
       </div>
 
-      {/* Admin Task Creation Modal */}
+      {/* Admin Task Creation / Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-bg/85 backdrop-blur-xl animate-fadeIn">
           <div className="relative w-full max-w-lg glass-panel rounded-3xl border border-dark-border/90 p-6 sm:p-8 shadow-2xl">
             <div className="flex items-center justify-between pb-4 border-b border-dark-border mb-6">
-              <h3 className="text-xl font-display font-extrabold text-white">Create System Habit (Admin)</h3>
+              <h3 className="text-xl font-display font-extrabold text-white">
+                {editingTask ? 'Edit System Habit (Admin)' : 'Create System Habit (Admin)'}
+              </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="p-2 rounded-full bg-dark-card border border-dark-border text-gray-400 hover:text-white"
@@ -351,7 +403,7 @@ export const TaskManager = () => {
                   type="submit"
                   className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-fire to-amber-500 text-white font-extrabold text-xs shadow-orange-glow"
                 >
-                  Create System Habit
+                  {editingTask ? 'Save Habit Changes' : 'Create System Habit'}
                 </button>
               </div>
             </form>

@@ -566,6 +566,29 @@ export const AppProvider = ({ children }) => {
     showToast(`New ${difficultyLevel} Habit & 3 Live Specialized Badges Created for [${recipientLabel}]! 🌟`);
   };
 
+  const updateTask = (taskId, updatedData) => {
+    const difficultyLevel = updatedData.difficulty || 'Medium';
+    const calculatedXp = DIFFICULTY_XP_MAP[difficultyLevel] || 120;
+
+    setTasks(prev => prev.map(task => {
+      if (task.id === taskId) {
+        const updatedObj = {
+          ...task,
+          ...updatedData,
+          targetValue: Number(updatedData.targetValue) || 1,
+          points: calculatedXp,
+        };
+        if (currentUser?.uid) {
+          saveTaskToCloud(currentUser.uid, updatedObj);
+        }
+        return updatedObj;
+      }
+      return task;
+    }));
+
+    showToast('Habit updated successfully by Admin.', 'success');
+  };
+
   const addUserTask = addNewTask;
 
 
@@ -760,6 +783,7 @@ export const AppProvider = ({ children }) => {
         approveProof,
         rejectProof,
         addNewTask,
+        updateTask,
         deleteTask,
         clearAllData,
         dailyProgressPercent,
