@@ -23,7 +23,10 @@ import {
   saveAdminSettingsToCloud, 
   syncUserTasksFromCloud,
   saveUserProfileToCloud,
+  syncAllUsersFromCloud,
+  deleteUserFromCloud,
   saveProofToCloud,
+  deleteProofFromCloud,
   saveBadgesToCloud,
   syncAllProofsFromCloud
 } from '../services/dbService';
@@ -41,6 +44,7 @@ export const AppProvider = ({ children }) => {
   const [currentUserRole, setCurrentUserRole] = useState('guest');
   const [role, setRole] = useState('user');
   const [authLoading, setAuthLoading] = useState(true);
+  const [registeredUsers, setRegisteredUsers] = useState([]);
 
   // App UI State with Persistence Fallback
   const [user, setUser] = useState(() => {
@@ -288,8 +292,12 @@ export const AppProvider = ({ children }) => {
           });
 
           syncAllProofsFromCloud((cloudProofs) => {
-            if (cloudProofs && cloudProofs.length > 0) {
-              setProofs(cloudProofs);
+            setProofs(cloudProofs || []);
+          });
+
+          syncAllUsersFromCloud((cloudUsers) => {
+            if (cloudUsers) {
+              setRegisteredUsers(cloudUsers);
             }
           });
 
@@ -650,6 +658,18 @@ export const AppProvider = ({ children }) => {
     showToast(`Proof Rejected for ${targetProof.userName}`, 'error');
   };
 
+  const deleteProof = (proofId) => {
+    setProofs(prev => prev.filter(p => p.id !== proofId));
+    deleteProofFromCloud(proofId);
+    showToast('Proof submission deleted permanently.', 'info');
+  };
+
+  const deleteUser = (userId) => {
+    setRegisteredUsers(prev => prev.filter(u => u.id !== userId && u.email !== userId && u.name !== userId));
+    deleteUserFromCloud(userId);
+    showToast('User profile removed from system.', 'info');
+  };
+
   const deleteTask = (taskId) => {
     setTasks(prev => prev.filter(t => t.id !== taskId));
     setProofs(prev => prev.filter(p => p.taskId !== taskId));
@@ -663,6 +683,9 @@ export const AppProvider = ({ children }) => {
 
   // Clear Database & Reset All Data
   const clearAllData = () => {
+    proofs.forEach(p => deleteProofFromCloud(p.id));
+    registeredUsers.forEach(u => deleteUserFromCloud(u.id));
+
     localStorage.removeItem('newself_user');
     localStorage.removeItem('newself_tasks');
     localStorage.removeItem('newself_proofs');
@@ -673,7 +696,8 @@ export const AppProvider = ({ children }) => {
 
     setUser(INITIAL_USER);
     setTasks(INITIAL_TASKS);
-    setProofs(INITIAL_PROOFS);
+    setProofs([]);
+    setRegisteredUsers([]);
     setBadges(CORE_BADGES);
     setTaskCompletions({});
     setUserTonePreferences(INITIAL_USER_TONES);
@@ -706,6 +730,9 @@ export const AppProvider = ({ children }) => {
         admin,
         tasks,
         proofs,
+        deleteProof,
+        registeredUsers,
+        deleteUser,
         badges,
         getBadgeProgress,
         taskCompletions,

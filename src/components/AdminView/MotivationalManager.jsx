@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { MOTIVATIONAL_CATEGORIES } from '../../constants';
-import { Sparkles, Flame, Heart, Zap, Sun, Shield, CheckCircle2, User, Sliders, Users } from 'lucide-react';
+import { Sparkles, Flame, Heart, Zap, Sun, Shield, CheckCircle2, User, Sliders, Users, Trash2 } from 'lucide-react';
 import { TiltCard } from '../Common/TiltCard';
 
 export const MotivationalManager = () => {
@@ -12,12 +12,18 @@ export const MotivationalManager = () => {
     setUserTonePreference,
     currentUser,
     user,
+    registeredUsers,
+    deleteUser,
     proofs,
     showToast
   } = useApp();
 
-  // Extract unique active members deduplicated by email / primary identifier
+  // Extract unique active members from Firestore registered users, proofs & current session
   const emailMap = {};
+  registeredUsers.forEach(u => {
+    if (u.email) emailMap[u.name?.toLowerCase()] = u.email.toLowerCase();
+    if (u.email) emailMap[u.handle?.toLowerCase()] = u.email.toLowerCase();
+  });
   if (user?.email && user?.name) emailMap[user.name.toLowerCase()] = user.email.toLowerCase();
   if (currentUser?.email) emailMap[currentUser.email.split('@')[0].toLowerCase()] = currentUser.email.toLowerCase();
   proofs.forEach(p => {
@@ -25,6 +31,7 @@ export const MotivationalManager = () => {
   });
 
   const rawKeys = [
+    ...registeredUsers.map(u => u.email || u.handle || u.name).filter(Boolean),
     ...(currentUser?.email ? [currentUser.email] : []),
     ...(user?.email ? [user.email] : []),
     ...proofs.map(p => p.userEmail || p.userName).filter(Boolean),
@@ -37,7 +44,8 @@ export const MotivationalManager = () => {
     Boolean(key) && 
     !key.includes('admin') && 
     key !== 'admin commander' &&
-    key !== '@admin'
+    key !== '@admin' &&
+    key !== 'demo' // Filter out demo account
   );
 
   const handleClearRoster = () => {
@@ -131,18 +139,28 @@ export const MotivationalManager = () => {
                           </div>
                         </td>
 
-                        {/* Individual Tone Selector Dropdown */}
+                        {/* Individual Tone Selector Dropdown & Delete Action */}
                         <td className="py-4 px-5 text-right">
-                          <select
-                            value={activeToneId}
-                            onChange={(e) => setUserTonePreference(memberKey, e.target.value)}
-                            className="px-3 py-1.5 rounded-xl bg-dark-bg border border-dark-border text-white text-xs font-bold focus:outline-none focus:border-cyan-glow cursor-pointer"
-                          >
-                            <option value="hard">🔥 Hard On-Point (Discipline)</option>
-                            <option value="romantic">💖 Romantic & Affirming</option>
-                            <option value="hype">⚡ High Energy & Hype</option>
-                            <option value="zen">🧘 Zen & Mindful Wisdom</option>
-                          </select>
+                          <div className="flex items-center justify-end space-x-2">
+                            <select
+                              value={activeToneId}
+                              onChange={(e) => setUserTonePreference(memberKey, e.target.value)}
+                              className="px-3 py-1.5 rounded-xl bg-dark-bg border border-dark-border text-white text-xs font-bold focus:outline-none focus:border-cyan-glow cursor-pointer"
+                            >
+                              <option value="hard">🔥 Hard On-Point (Discipline)</option>
+                              <option value="romantic">💖 Romantic & Affirming</option>
+                              <option value="hype">⚡ High Energy & Hype</option>
+                              <option value="zen">🧘 Zen & Mindful Wisdom</option>
+                            </select>
+
+                            <button
+                              onClick={() => deleteUser(memberKey)}
+                              className="p-2 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-400 hover:bg-rose-500/30 transition-colors"
+                              title="Delete Member from Roster"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </td>
 
                       </tr>

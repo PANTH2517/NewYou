@@ -67,6 +67,30 @@ export const saveUserProfileToCloud = async (userId, userProfile) => {
   }
 };
 
+export const syncAllUsersFromCloud = (callback) => {
+  if (!db) return () => {};
+  try {
+    const q = query(collection(db, 'users'));
+    return onSnapshot(q, (snapshot) => {
+      const users = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      callback(users);
+    }, () => {});
+  } catch (e) {
+    return () => {};
+  }
+};
+
+export const deleteUserFromCloud = async (userId) => {
+  if (!db || !userId) return;
+  try {
+    const userRef = doc(db, 'users', userId);
+    await deleteDoc(userRef);
+  } catch (e) {
+    // Silent catch
+  }
+};
+
+
 export const saveProofToCloud = async (proof) => {
   if (!db || !proof?.id) return;
   try {
@@ -75,6 +99,16 @@ export const saveProofToCloud = async (proof) => {
       ...proof,
       updatedAt: new Date().toISOString()
     }, { merge: true });
+  } catch (e) {
+    // Silent catch
+  }
+};
+
+export const deleteProofFromCloud = async (proofId) => {
+  if (!db || !proofId) return;
+  try {
+    const proofRef = doc(db, 'proofs', proofId);
+    await deleteDoc(proofRef);
   } catch (e) {
     // Silent catch
   }
@@ -96,7 +130,7 @@ export const syncAllProofsFromCloud = (callback) => {
     const q = query(collection(db, 'proofs'));
     return onSnapshot(q, (snapshot) => {
       const cloudProofs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      if (cloudProofs.length > 0) callback(cloudProofs);
+      callback(cloudProofs);
     }, () => {});
   } catch (e) {
     return () => {};

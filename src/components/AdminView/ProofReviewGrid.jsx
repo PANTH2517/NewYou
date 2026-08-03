@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { UserAvatar } from '../Common/UserAvatar';
-import { Check, X, RefreshCcw, Eye, Clock, ShieldCheck, AlertCircle, Camera, User, Filter } from 'lucide-react';
+import { Check, X, RefreshCcw, Eye, Clock, ShieldCheck, AlertCircle, Camera, User, Filter, Trash2 } from 'lucide-react';
 import { TiltCard } from '../Common/TiltCard';
 
 const PRESET_FALLBACK_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
@@ -21,7 +21,7 @@ const PRESET_FALLBACK_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
 `)}`;
 
 export const ProofReviewGrid = () => {
-  const { proofs, approveProof, rejectProof } = useApp();
+  const { proofs, approveProof, rejectProof, deleteProof } = useApp();
   const [filterStatus, setFilterStatus] = useState('pending'); // 'pending' | 'approved' | 'rejected' | 'all'
   const [previewImage, setPreviewImage] = useState(null);
 
@@ -102,22 +102,31 @@ export const ProofReviewGrid = () => {
                       </div>
                     </div>
 
-                    {/* Status Pill */}
-                    {proof.status === 'approved' && (
-                      <span className="px-2.5 py-1 rounded-full bg-emerald-neon/15 text-emerald-neon border border-emerald-neon/30 text-[10px] font-bold">
-                        Approved
-                      </span>
-                    )}
-                    {proof.status === 'pending' && (
-                      <span className="px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px] font-bold animate-pulse">
-                        Pending
-                      </span>
-                    )}
-                    {proof.status === 'rejected' && (
-                      <span className="px-2.5 py-1 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/30 text-[10px] font-bold">
-                        Rejected
-                      </span>
-                    )}
+                    {/* Status Pill & Delete Button */}
+                    <div className="flex items-center space-x-2">
+                      {proof.status === 'approved' && (
+                        <span className="px-2.5 py-1 rounded-full bg-emerald-neon/15 text-emerald-neon border border-emerald-neon/30 text-[10px] font-bold">
+                          Approved
+                        </span>
+                      )}
+                      {proof.status === 'pending' && (
+                        <span className="px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px] font-bold animate-pulse">
+                          Pending
+                        </span>
+                      )}
+                      {proof.status === 'rejected' && (
+                        <span className="px-2.5 py-1 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/30 text-[10px] font-bold">
+                          Rejected
+                        </span>
+                      )}
+                      <button
+                        onClick={() => deleteProof(proof.id)}
+                        className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/25 border border-rose-500/30 text-rose-400 transition-all"
+                        title="Delete proof submission permanently"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Task Title */}
