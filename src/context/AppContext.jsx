@@ -300,24 +300,6 @@ export const AppProvider = ({ children }) => {
             setActiveTab('dashboard');
             showToast(`Authenticated as Routine Member (${fbUser.email})`, 'success');
           }
-
-          // Subscribe to Cloud Firestore Task Sync & Proof Sync
-          syncUserTasksFromCloud(fbUser.uid, (cloudTasks) => {
-            if (cloudTasks && cloudTasks.length > 0) {
-              setTasks(cloudTasks);
-            }
-          });
-
-          syncAllProofsFromCloud((cloudProofs) => {
-            setProofs(cloudProofs || []);
-          });
-
-          syncAllUsersFromCloud((cloudUsers) => {
-            if (cloudUsers) {
-              setRegisteredUsers(cloudUsers);
-            }
-          });
-
         } else {
           setCurrentUser(null);
           setCurrentUserRole('guest');
@@ -753,11 +735,9 @@ export const AppProvider = ({ children }) => {
     showToast('Habit deleted from system by Admin.', 'info');
   };
 
-  // Clear Database & Reset All Data
-  const clearAllData = () => {
-    proofs.forEach(p => deleteProofFromCloud(p.id));
-    registeredUsers.forEach(u => deleteUserFromCloud(u.id));
-    apiResetSystem();
+  // Clear Database & Reset All Data (MongoDB Atlas + Local State)
+  const clearAllData = async () => {
+    await apiResetSystem();
 
     localStorage.removeItem('newself_user');
     localStorage.removeItem('newself_tasks');
@@ -767,14 +747,13 @@ export const AppProvider = ({ children }) => {
     localStorage.removeItem('newself_task_completions');
     localStorage.removeItem('newself_global_tone');
 
-    setUser(INITIAL_USER);
-    setTasks(INITIAL_TASKS);
+    setTasks([]);
     setProofs([]);
     setRegisteredUsers([]);
     setBadges(CORE_BADGES);
     setTaskCompletions({});
-    setUserTonePreferences(INITIAL_USER_TONES);
-    showToast('Database wiped clean! All tasks, proofs, & stats reset.', 'info');
+    setUserTonePreferences({});
+    showToast('MongoDB Atlas database & system wiped clean!', 'info');
   };
 
   // Calculate overall progress
