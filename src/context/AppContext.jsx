@@ -354,8 +354,10 @@ export const AppProvider = ({ children }) => {
 
   // Admin Method to Set Individual User Tone Preference
   const setUserTonePreference = (userKey, toneId) => {
-    setUserTonePreferences(prev => ({ ...prev, [userKey]: toneId }));
+    const updated = { ...userTonePreferences, [userKey]: toneId };
+    setUserTonePreferences(updated);
     saveAdminSettingsToCloud({ userTonePreferences: { [userKey]: toneId } });
+    apiSaveAdminSettings({ motivationalCategory, userTonePreferences: updated });
     showToast(`Assigned ${MOTIVATIONAL_CATEGORIES[toneId]?.title || toneId} tone to ${userKey}! ✨`, 'info');
   };
 
@@ -383,6 +385,7 @@ export const AppProvider = ({ children }) => {
     setMotivationalCategory(newCat);
     localStorage.setItem('newself_global_tone', newCat);
     saveAdminSettingsToCloud({ motivationalCategory: newCat });
+    apiSaveAdminSettings({ motivationalCategory: newCat, userTonePreferences });
     showToast(`Global Default Tone Category set to "${MOTIVATIONAL_CATEGORIES[newCat]?.title}" 🔥`, 'info');
   };
 
