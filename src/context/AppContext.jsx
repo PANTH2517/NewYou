@@ -166,7 +166,11 @@ export const AppProvider = ({ children }) => {
     switch (badge.reqType) {
       case 'completedCount': current = completedCount; break;
       case 'streak': current = user.streak || 0; break;
-      case 'level': current = currentLevel; break;
+      case 'level': {
+        current = Math.max(0, currentLevel - 1);
+        target = Math.max(1, badge.reqTarget - 1);
+        break;
+      }
       case 'xp': current = user.xp || 0; break;
       case 'approvedProofs': current = approvedProofs; break;
       case 'nutritionCount': current = nutritionCount; break;
