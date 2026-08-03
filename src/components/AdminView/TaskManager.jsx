@@ -157,7 +157,7 @@ export const TaskManager = () => {
                 <th className="py-3.5 px-3">Target Steps/Value</th>
                 <th className="py-3.5 px-3">Difficulty & XP</th>
                 <th className="py-3.5 px-3">Proof Mode</th>
-                <th className="py-3.5 px-4 text-center sticky right-0 bg-dark-bg/95 shadow-md border-l border-dark-border/80">Actions</th>
+                <th className="py-3.5 px-4 text-center sticky right-0 bg-[#0B0F17] z-10 border-l border-dark-border shadow-2xl">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-dark-border/60">
@@ -221,8 +221,8 @@ export const TaskManager = () => {
                       )}
                     </td>
 
-                    {/* Edit & Delete Actions (Sticky Right) */}
-                    <td className="py-3.5 px-4 text-center sticky right-0 bg-dark-bg/95 border-l border-dark-border/80">
+                    {/* Edit & Delete Actions (Sticky Right Opaque) */}
+                    <td className="py-3.5 px-4 text-center sticky right-0 bg-[#0B0F17] z-10 border-l border-dark-border">
                       <div className="flex items-center justify-center space-x-2">
                         <button
                           onClick={() => handleOpenEdit(t)}
