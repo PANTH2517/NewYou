@@ -30,6 +30,22 @@ import {
   saveBadgesToCloud,
   syncAllProofsFromCloud
 } from '../services/dbService';
+import {
+  apiFetchTasks,
+  apiSaveTask,
+  apiUpdateTask,
+  apiDeleteTask,
+  apiFetchProofs,
+  apiSaveProof,
+  apiUpdateProof,
+  apiDeleteProof,
+  apiFetchUsers,
+  apiSaveUser,
+  apiDeleteUser,
+  apiFetchAdminSettings,
+  apiSaveAdminSettings,
+  apiResetSystem
+} from '../services/apiService';
 import { XP_LEVELS, MOTIVATIONAL_CATEGORIES, CORE_BADGES, getLevelInfo } from '../constants';
 
 export { XP_LEVELS, MOTIVATIONAL_CATEGORIES, CORE_BADGES, getLevelInfo };
@@ -280,6 +296,7 @@ export const AppProvider = ({ children }) => {
             };
             setUser(prev => ({ ...prev, ...userData }));
             saveUserProfileToCloud(fbUser.uid, userData);
+            apiSaveUser({ id: fbUser.uid, ...userData });
             setActiveTab('dashboard');
             showToast(`Authenticated as Routine Member (${fbUser.email})`, 'success');
           }
@@ -312,6 +329,27 @@ export const AppProvider = ({ children }) => {
       console.warn("Auth state listener warning:", e);
       setAuthLoading(false);
     }
+  }, []);
+
+  // Sync MongoDB Backend API
+  useEffect(() => {
+    const syncMongoDB = async () => {
+      const dbTasks = await apiFetchTasks();
+      if (dbTasks && dbTasks.length > 0) setTasks(dbTasks);
+
+      const dbProofs = await apiFetchProofs();
+      if (dbProofs && Array.isArray(dbProofs)) setProofs(dbProofs);
+
+      const dbUsers = await apiFetchUsers();
+      if (dbUsers && Array.isArray(dbUsers)) setRegisteredUsers(dbUsers);
+
+      const dbSettings = await apiFetchAdminSettings();
+      if (dbSettings) {
+        if (dbSettings.motivationalCategory) setMotivationalCategory(dbSettings.motivationalCategory);
+        if (dbSettings.userTonePreferences) setUserTonePreferences(dbSettings.userTonePreferences);
+      }
+    };
+    syncMongoDB();
   }, []);
 
   // Admin Method to Set Individual User Tone Preference
@@ -561,6 +599,7 @@ export const AppProvider = ({ children }) => {
     if (currentUser?.uid) {
       saveTaskToCloud(currentUser.uid, taskObj);
     }
+    apiSaveTask(taskObj);
 
     const recipientLabel = taskObj.assignedTo === 'all' ? 'All Members' : taskObj.assignedTo;
     showToast(`New ${difficultyLevel} Habit & 3 Live Specialized Badges Created for [${recipientLabel}]! 🌟`);
@@ -581,6 +620,7 @@ export const AppProvider = ({ children }) => {
         if (currentUser?.uid) {
           saveTaskToCloud(currentUser.uid, updatedObj);
         }
+        apiUpdateTask(taskId, updatedObj);
         return updatedObj;
       }
       return task;
@@ -614,6 +654,7 @@ export const AppProvider = ({ children }) => {
     const updatedProofs = [newProof, ...proofs];
     setProofs(updatedProofs);
     saveProofToCloud(newProof);
+    apiSaveProof(newProof);
 
     setTasks(prev =>
       prev.map(t => (t.id === taskId ? { ...t, proofStatus: 'pending', proofUrl: newProof.imageUrl, completed: true } : t))
@@ -640,6 +681,7 @@ export const AppProvider = ({ children }) => {
     const updatedProofs = proofs.map(p => (p.id === proofId ? approvedProofObj : p));
     setProofs(updatedProofs);
     saveProofToCloud(approvedProofObj);
+    apiUpdateProof(proofId, approvedProofObj);
     checkAndUpdateStreak();
 
     setTasks(prev =>
@@ -668,6 +710,7 @@ export const AppProvider = ({ children }) => {
       prev.map(p => (p.id === proofId ? rejectedProofObj : p))
     );
     saveProofToCloud(rejectedProofObj);
+    apiUpdateProof(proofId, rejectedProofObj);
 
     setTasks(prev =>
       prev.map(t => (t.id === targetProof.taskId ? { ...t, proofStatus: 'rejected', completed: false } : t))
@@ -684,12 +727,14 @@ export const AppProvider = ({ children }) => {
   const deleteProof = (proofId) => {
     setProofs(prev => prev.filter(p => p.id !== proofId));
     deleteProofFromCloud(proofId);
+    apiDeleteProof(proofId);
     showToast('Proof submission deleted permanently.', 'info');
   };
 
   const deleteUser = (userId) => {
     setRegisteredUsers(prev => prev.filter(u => u.id !== userId && u.email !== userId && u.name !== userId));
     deleteUserFromCloud(userId);
+    apiDeleteUser(userId);
     showToast('User profile removed from system.', 'info');
   };
 
@@ -701,6 +746,7 @@ export const AppProvider = ({ children }) => {
     if (currentUser?.uid) {
       deleteTaskFromCloud(currentUser.uid, taskId);
     }
+    apiDeleteTask(taskId);
     showToast('Habit deleted from system by Admin.', 'info');
   };
 
@@ -708,6 +754,7 @@ export const AppProvider = ({ children }) => {
   const clearAllData = () => {
     proofs.forEach(p => deleteProofFromCloud(p.id));
     registeredUsers.forEach(u => deleteUserFromCloud(u.id));
+    apiResetSystem();
 
     localStorage.removeItem('newself_user');
     localStorage.removeItem('newself_tasks');
