@@ -30,7 +30,7 @@ app.get('/api/health', (req, res) => {
 // ==========================================
 // 1. HABIT TASKS ENDPOINTS
 // ==========================================
-app.get('/api/tasks', async (req, res) => {
+app.get(['/api/tasks', '/tasks'], async (req, res) => {
   try {
     const tasks = await Task.find().sort({ createdAt: -1 });
     res.json(tasks);
@@ -39,7 +39,7 @@ app.get('/api/tasks', async (req, res) => {
   }
 });
 
-app.post('/api/tasks', async (req, res) => {
+app.post(['/api/tasks', '/tasks'], async (req, res) => {
   try {
     const taskData = req.body;
     const task = await Task.findOneAndUpdate(
@@ -53,7 +53,7 @@ app.post('/api/tasks', async (req, res) => {
   }
 });
 
-app.put('/api/tasks/:id', async (req, res) => {
+app.put(['/api/tasks/:id', '/tasks/:id'], async (req, res) => {
   try {
     const task = await Task.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
     res.json(task);
@@ -62,7 +62,7 @@ app.put('/api/tasks/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/tasks/:id', async (req, res) => {
+app.delete(['/api/tasks/:id', '/tasks/:id'], async (req, res) => {
   try {
     await Task.findOneAndDelete({ id: req.params.id });
     res.json({ success: true, id: req.params.id });
@@ -74,7 +74,7 @@ app.delete('/api/tasks/:id', async (req, res) => {
 // ==========================================
 // 2. PROOFS ENDPOINTS
 // ==========================================
-app.get('/api/proofs', async (req, res) => {
+app.get(['/api/proofs', '/proofs'], async (req, res) => {
   try {
     const proofs = await Proof.find().sort({ createdAt: -1 });
     res.json(proofs);
@@ -83,7 +83,7 @@ app.get('/api/proofs', async (req, res) => {
   }
 });
 
-app.post('/api/proofs', async (req, res) => {
+app.post(['/api/proofs', '/proofs'], async (req, res) => {
   try {
     const proofData = req.body;
     const proof = await Proof.findOneAndUpdate(
@@ -97,7 +97,7 @@ app.post('/api/proofs', async (req, res) => {
   }
 });
 
-app.put('/api/proofs/:id', async (req, res) => {
+app.put(['/api/proofs/:id', '/proofs/:id'], async (req, res) => {
   try {
     const proof = await Proof.findOneAndUpdate({ id: req.params.id }, req.body, { new: true });
     res.json(proof);
@@ -106,7 +106,7 @@ app.put('/api/proofs/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/proofs/:id', async (req, res) => {
+app.delete(['/api/proofs/:id', '/proofs/:id'], async (req, res) => {
   try {
     await Proof.findOneAndDelete({ id: req.params.id });
     res.json({ success: true, id: req.params.id });
@@ -115,7 +115,7 @@ app.delete('/api/proofs/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/proofs', async (req, res) => {
+app.delete(['/api/proofs', '/proofs'], async (req, res) => {
   try {
     await Proof.deleteMany({});
     res.json({ success: true, message: 'All proofs cleared' });
@@ -127,7 +127,7 @@ app.delete('/api/proofs', async (req, res) => {
 // ==========================================
 // 3. USER ROSTER ENDPOINTS
 // ==========================================
-app.get('/api/users', async (req, res) => {
+app.get(['/api/users', '/users'], async (req, res) => {
   try {
     const users = await User.find({ email: { $ne: 'demo' }, name: { $ne: 'demo' } }).sort({ updatedAt: -1 });
     res.json(users);
@@ -136,7 +136,7 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
-app.post('/api/users', async (req, res) => {
+app.post(['/api/users', '/users'], async (req, res) => {
   try {
     const userData = req.body;
     if (!userData || userData.email === 'demo' || userData.name === 'demo') {
@@ -154,7 +154,7 @@ app.post('/api/users', async (req, res) => {
   }
 });
 
-app.delete('/api/users/:id', async (req, res) => {
+app.delete(['/api/users/:id', '/users/:id'], async (req, res) => {
   try {
     await User.findOneAndDelete({ $or: [{ id: req.params.id }, { email: req.params.id }, { name: req.params.id }] });
     res.json({ success: true, id: req.params.id });
@@ -166,7 +166,7 @@ app.delete('/api/users/:id', async (req, res) => {
 // ==========================================
 // 4. ADMIN SETTINGS ENDPOINTS
 // ==========================================
-app.get('/api/admin/settings', async (req, res) => {
+app.get(['/api/admin/settings', '/admin/settings'], async (req, res) => {
   try {
     let settings = await AdminSettings.findOne({ id: 'admin_settings' });
     if (!settings) {
@@ -178,7 +178,7 @@ app.get('/api/admin/settings', async (req, res) => {
   }
 });
 
-app.put('/api/admin/settings', async (req, res) => {
+app.put(['/api/admin/settings', '/admin/settings'], async (req, res) => {
   try {
     const settings = await AdminSettings.findOneAndUpdate(
       { id: 'admin_settings' },
