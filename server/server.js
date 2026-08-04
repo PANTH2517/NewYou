@@ -12,19 +12,51 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/newyou';
+const DEFAULT_ATLAS_URI = 'mongodb+srv://dhggaming49_db_user:Panth_2517@wpdbms.tjvixh1.mongodb.net/NewYou?retryWrites=true&w=majority&appName=WPDBMS';
+const MONGODB_URI = process.env.MONGODB_URI || DEFAULT_ATLAS_URI;
 
-app.use(cors());
+let isConnected = false;
+
+async function connectDB() {
+  if (isConnected && mongoose.connection.readyState === 1) {
+    return;
+  }
+  try {
+    const db = await mongoose.connect(MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+    });
+    isConnected = db.connections[0].readyState === 1;
+    console.log(`⚡ MongoDB Atlas Connected Successfully`);
+  } catch (err) {
+    console.error("❌ MongoDB Atlas Connection Error:", err.message);
+    throw err;
+  }
+}
+
+app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 
-// Connect to MongoDB
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log(`⚡ MongoDB Connected Successfully: ${MONGODB_URI}`))
-  .catch((err) => console.warn(`⚠️ MongoDB Connection Warning: ${err.message}. Running fallback mode.`));
+// Middleware to ensure MongoDB Atlas connection on EVERY API request
+app.use(async (req, res, next) => {
+  if (req.path === '/api/health' || req.path === '/health') {
+    return next();
+  }
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    return res.status(500).json({ error: "Database connection failed: " + err.message });
+  }
+});
 
 // Root Check Endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'NewYou MongoDB Backend Engine Active 🚀' });
+app.get(['/api/health', '/health'], async (req, res) => {
+  try {
+    await connectDB();
+    res.json({ status: 'ok', database: 'connected', message: 'NewYou MongoDB Backend Engine Active 🚀' });
+  } catch (err) {
+    res.status(500).json({ status: 'error', database: 'disconnected', error: err.message });
+  }
 });
 
 // ==========================================
