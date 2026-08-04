@@ -40,18 +40,31 @@ export const MotivationalManager = () => {
 
   const dynamicMemberKeys = Array.from(new Set(
     rawKeys.map(k => emailMap[k.toLowerCase()] || k.toLowerCase())
-  )).filter(key => 
-    Boolean(key) && 
-    !key.includes('admin') && 
-    key !== 'admin commander' &&
-    key !== '@admin' &&
-    key !== 'demo' // Filter out demo account
-  );
+  )).filter(key => {
+    const keyLower = String(key).toLowerCase();
+    // Verify key exists in registeredUsers, userTonePreferences, proofs or currentUser
+    const isDeletedFromRegistered = registeredUsers.length > 0 && !registeredUsers.some(u => 
+      u.email?.toLowerCase() === keyLower || 
+      u.name?.toLowerCase() === keyLower || 
+      u.handle?.toLowerCase() === keyLower ||
+      u.id?.toLowerCase() === keyLower
+    );
+    const hasTonePref = Boolean(userTonePreferences[key] || userTonePreferences[keyLower]);
+
+    return (
+      Boolean(key) && 
+      !keyLower.includes('admin') && 
+      keyLower !== 'admin commander' &&
+      keyLower !== '@admin' &&
+      keyLower !== 'demo' &&
+      (hasTonePref || !isDeletedFromRegistered)
+    );
+  });
 
   const handleClearRoster = () => {
     localStorage.removeItem('newself_user_tones');
-    // Reload state clean
-    window.location.reload();
+    registeredUsers.forEach(u => deleteUser(u.id || u.email));
+    showToast('Member tone roster cleared!', 'info');
   };
 
   return (

@@ -744,10 +744,25 @@ export const AppProvider = ({ children }) => {
   };
 
   const deleteUser = (userId) => {
-    setRegisteredUsers(prev => prev.filter(u => u.id !== userId && u.email !== userId && u.name !== userId));
+    const keyLower = String(userId).toLowerCase();
+    setRegisteredUsers(prev => prev.filter(u => 
+      u.id !== userId && 
+      u.email?.toLowerCase() !== keyLower && 
+      u.name?.toLowerCase() !== keyLower &&
+      u.handle?.toLowerCase() !== keyLower
+    ));
+
+    setUserTonePreferences(prev => {
+      const next = { ...prev };
+      delete next[userId];
+      delete next[keyLower];
+      apiSaveAdminSettings({ motivationalCategory, userTonePreferences: next });
+      return next;
+    });
+
     deleteUserFromCloud(userId);
     apiDeleteUser(userId);
-    showToast('User profile removed from system.', 'info');
+    showToast(`Member profile "${userId}" removed permanently from system.`, 'info');
   };
 
   const deleteTask = (taskId) => {
