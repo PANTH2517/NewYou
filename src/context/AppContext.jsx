@@ -72,12 +72,12 @@ export const AppProvider = ({ children }) => {
 
   const [tasks, setTasks] = useState(() => {
     const saved = localStorage.getItem('newself_tasks');
-    return saved ? JSON.parse(saved) : INITIAL_TASKS;
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [proofs, setProofs] = useState(() => {
     const saved = localStorage.getItem('newself_proofs');
-    return saved ? JSON.parse(saved) : INITIAL_PROOFS;
+    return saved ? JSON.parse(saved) : [];
   });
 
   // Track Task Completion Counts for Specialized Badges
@@ -337,17 +337,17 @@ export const AppProvider = ({ children }) => {
     }
   }, []);
 
-  // Sync MongoDB Backend API
+  // Sync MongoDB Backend API with Real-time Live Polling
   useEffect(() => {
     const syncMongoDB = async () => {
       const dbTasks = await apiFetchTasks();
-      if (dbTasks && dbTasks.length > 0) setTasks(dbTasks);
+      if (Array.isArray(dbTasks)) setTasks(dbTasks);
 
       const dbProofs = await apiFetchProofs();
-      if (dbProofs && Array.isArray(dbProofs)) setProofs(dbProofs);
+      if (Array.isArray(dbProofs)) setProofs(dbProofs);
 
       const dbUsers = await apiFetchUsers();
-      if (dbUsers && Array.isArray(dbUsers)) setRegisteredUsers(dbUsers);
+      if (Array.isArray(dbUsers)) setRegisteredUsers(dbUsers);
 
       const dbSettings = await apiFetchAdminSettings();
       if (dbSettings) {
@@ -355,7 +355,10 @@ export const AppProvider = ({ children }) => {
         if (dbSettings.userTonePreferences) setUserTonePreferences(dbSettings.userTonePreferences);
       }
     };
+
     syncMongoDB();
+    const interval = setInterval(syncMongoDB, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   // Admin Method to Set Individual User Tone Preference
