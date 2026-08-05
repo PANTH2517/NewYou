@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { DIFFICULTY_XP_MAP } from '../../mockData';
-import { Plus, Trash2, Edit2, Footprints, Utensils, Droplets, BookOpen, Brain, Code, Zap, Camera, Shield, Check, X, User, Flame } from 'lucide-react';
+import { Plus, Trash2, Edit2, Footprints, Utensils, Droplets, BookOpen, Brain, Code, Zap, Camera, Shield, Check, X, User, Flame, Calendar } from 'lucide-react';
 import { TiltCard } from '../Common/TiltCard';
 
 const ICON_MAP = {
@@ -31,6 +31,8 @@ export const TaskManager = () => {
     icon: 'Zap',
     requiresProof: true,
     description: '',
+    frequency: 'daily',
+    selectedDays: [],
   });
 
   const registeredMembers = Array.from(new Set([
@@ -60,6 +62,8 @@ export const TaskManager = () => {
       icon: 'Zap',
       requiresProof: true,
       description: '',
+      frequency: 'daily',
+      selectedDays: [],
     });
     setIsModalOpen(true);
   };
@@ -76,6 +80,8 @@ export const TaskManager = () => {
       icon: t.icon || 'Zap',
       requiresProof: t.requiresProof ?? true,
       description: t.description || '',
+      frequency: t.frequency || 'daily',
+      selectedDays: t.selectedDays || [],
     });
     setIsModalOpen(true);
   };
@@ -314,6 +320,52 @@ export const TaskManager = () => {
                   <option value="Hard">🔴 Hard (200 XP Reward)</option>
                   <option value="Extreme">⚡ Extreme / Iron Will (350 XP Reward)</option>
                 </select>
+              </div>
+
+              {/* Schedule & Frequency Selector */}
+              <div className="p-3.5 rounded-xl bg-dark-bg border border-dark-border space-y-2">
+                <label className="block text-xs font-bold text-emerald-400 flex items-center space-x-1">
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>Task Schedule & Frequency</span>
+                </label>
+                <select
+                  value={formData.frequency || 'daily'}
+                  onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl bg-dark-card border border-dark-border text-white text-xs font-bold focus:outline-none focus:border-emerald-400"
+                >
+                  <option value="daily">⚡ Daily Routine (Every Single Day)</option>
+                  <option value="weekly">📅 Weekly Target (Once per Week)</option>
+                  <option value="specific_days">🗓️ Specific Days (Selected Days of Week)</option>
+                </select>
+
+                {formData.frequency === 'specific_days' && (
+                  <div className="pt-2">
+                    <label className="block text-[11px] font-bold text-gray-300 mb-1.5">Select Active Days:</label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => {
+                        const isSelected = (formData.selectedDays || []).includes(day);
+                        return (
+                          <button
+                            key={day}
+                            type="button"
+                            onClick={() => {
+                              const curr = formData.selectedDays || [];
+                              const next = isSelected ? curr.filter(d => d !== day) : [...curr, day];
+                              setFormData({ ...formData, selectedDays: next });
+                            }}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-black border transition-all ${
+                              isSelected
+                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-emerald-500/20'
+                                : 'bg-dark-card text-gray-400 border-dark-border hover:border-gray-500'
+                            }`}
+                          >
+                            {day}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">

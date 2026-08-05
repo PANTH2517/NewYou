@@ -16,6 +16,8 @@ const TaskSchema = new mongoose.Schema({
   proofStatus: { type: String, default: 'none' },
   proofUrl: { type: String, default: '' },
   description: { type: String, default: '' },
+  frequency: { type: String, default: 'daily' },
+  selectedDays: { type: [String], default: [] },
   createdAt: { type: Date, default: Date.now }
 });
 

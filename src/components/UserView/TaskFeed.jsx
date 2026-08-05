@@ -17,7 +17,8 @@ import {
   ShieldCheck,
   AlertCircle,
   User,
-  Flame
+  Flame,
+  Calendar
 } from 'lucide-react';
 
 const ICON_MAP = {
@@ -76,6 +77,31 @@ export const TaskFeed = () => {
       default:
         return <span className="whitespace-nowrap inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-cyan-glow/15 text-cyan-glow border border-cyan-glow/40 text-[10px] font-extrabold shrink-0">🟡 Medium</span>;
     }
+  };
+
+  const getFrequencyBadge = (task) => {
+    if (task.frequency === 'weekly') {
+      return (
+        <span className="px-2 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/40 text-indigo-300 text-[10px] font-extrabold flex items-center space-x-1 shrink-0">
+          <Calendar className="w-3 h-3 text-indigo-400" />
+          <span>Weekly Habit</span>
+        </span>
+      );
+    }
+    if (task.frequency === 'specific_days' && task.selectedDays && task.selectedDays.length > 0) {
+      return (
+        <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-[10px] font-extrabold flex items-center space-x-1 shrink-0">
+          <Calendar className="w-3 h-3 text-emerald-400" />
+          <span>{task.selectedDays.join(', ')}</span>
+        </span>
+      );
+    }
+    return (
+      <span className="px-2 py-0.5 rounded-full bg-cyan-glow/10 border border-cyan-glow/30 text-cyan-glow text-[10px] font-extrabold flex items-center space-x-1 shrink-0">
+        <Zap className="w-3 h-3 text-cyan-glow" />
+        <span>Daily Target</span>
+      </span>
+    );
   };
 
   return (
@@ -166,8 +192,9 @@ export const TaskFeed = () => {
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center space-x-2 mt-1">
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1">
                         {getDifficultyBadge(task.difficulty || 'Medium')}
+                        {getFrequencyBadge(task)}
                         <span className="text-[11px] font-semibold text-gray-400">
                           {task.category} • +{task.points} XP
                         </span>
