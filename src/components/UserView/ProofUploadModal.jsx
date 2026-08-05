@@ -24,7 +24,7 @@ export const ProofUploadModal = () => {
 
   if (!activeUploadTask) return null;
 
-  // Process user file selection
+  // Process user file selection with automatic Canvas image compression
   const processFile = (file) => {
     if (!file || !file.type.startsWith('image/')) return;
 
@@ -33,10 +33,38 @@ export const ProofUploadModal = () => {
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      const dataUrl = e.target.result;
-      setSelectedImage(dataUrl);
-      setIsUploading(false);
-      setIsVerified(true);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width = Math.round((width * MAX_HEIGHT) / height);
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Compress image to lightweight JPEG data URL (~60KB - 100KB)
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+        setSelectedImage(compressedDataUrl);
+        setIsUploading(false);
+        setIsVerified(true);
+      };
+      img.src = e.target.result;
     };
     reader.readAsDataURL(file);
   };
