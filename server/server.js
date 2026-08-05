@@ -173,13 +173,14 @@ app.get(['/api/users', '/users'], async (req, res) => {
 app.post(['/api/users', '/users'], async (req, res) => {
   try {
     const userData = req.body;
-    if (!userData || userData.email === 'demo' || userData.name === 'demo') {
+    if (!userData || !userData.email || userData.email === 'demo') {
       return res.json({ ignored: true });
     }
+    const emailLower = userData.email.toLowerCase();
     const userId = userData.id || userData.uid || `user-${Date.now()}`;
     const user = await User.findOneAndUpdate(
-      { $or: [{ id: userId }, { email: userData.email }] },
-      { ...userData, id: userId, updatedAt: new Date() },
+      { $or: [{ id: userId }, { email: emailLower }] },
+      { ...userData, id: userId, email: emailLower, updatedAt: new Date() },
       { upsert: true, new: true }
     );
     res.json(user);

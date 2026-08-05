@@ -260,21 +260,23 @@ export const AppProvider = ({ children }) => {
   // Helper to sync user profile directly to MongoDB Atlas
   const registerUserInMongoDB = async (userData) => {
     if (!userData || !userData.email) return;
+    const cleanEmail = userData.email.toLowerCase().trim();
     const userObj = {
       id: userData.id || userData.uid || `user-${Date.now()}`,
-      email: userData.email,
-      name: userData.name || userData.email.split('@')[0],
-      handle: userData.handle || `@${userData.email.split('@')[0]}`,
-      role: userData.role || 'user',
+      email: cleanEmail,
+      name: userData.name || cleanEmail.split('@')[0],
+      handle: userData.handle || `@${cleanEmail.split('@')[0]}`,
+      role: userData.role || (cleanEmail === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user'),
       avatar: userData.avatar || null,
       level: userData.level || 1,
       title: userData.title || 'Novice Initiated',
       xp: userData.xp || 0,
       nextLevelXp: userData.nextLevelXp || 250,
       streak: userData.streak || 0,
-      highestStreak: userData.highestStreak || 0
+      highestStreak: userData.highestStreak || 0,
+      gender: userData.gender || 'unspecified'
     };
-    setRegisteredUsers(prev => [userObj, ...prev.filter(u => u.email !== userObj.email && u.id !== userObj.id)]);
+    setRegisteredUsers(prev => [userObj, ...prev.filter(u => u.email?.toLowerCase() !== cleanEmail && u.id !== userObj.id)]);
     await apiSaveUser(userObj);
   };
 
@@ -337,7 +339,7 @@ export const AppProvider = ({ children }) => {
     }
   }, []);
 
-  // Sync MongoDB Backend API with Real-time Live Polling
+  // Sync MongoDB Backend API with Real-time Live Polling & Auto-User Registration
   useEffect(() => {
     const syncMongoDB = async () => {
       const dbTasks = await apiFetchTasks();
@@ -347,7 +349,24 @@ export const AppProvider = ({ children }) => {
       if (Array.isArray(dbProofs)) setProofs(dbProofs);
 
       const dbUsers = await apiFetchUsers();
-      if (Array.isArray(dbUsers)) setRegisteredUsers(dbUsers);
+      if (Array.isArray(dbUsers)) {
+        setRegisteredUsers(dbUsers);
+
+        // Ensure active currentUser (e.g. Gmail login) is saved in MongoDB Atlas
+        if (currentUser && currentUser.email) {
+          const cEmail = currentUser.email.toLowerCase().trim();
+          const exists = dbUsers.some(u => u.email?.toLowerCase() === cEmail);
+          if (!exists) {
+            registerUserInMongoDB({
+              id: currentUser.uid,
+              email: cEmail,
+              name: currentUser.displayName || cEmail.split('@')[0],
+              handle: `@${cEmail.split('@')[0]}`,
+              avatar: currentUser.photoURL || null
+            });
+          }
+        }
+      }
 
       const dbSettings = await apiFetchAdminSettings();
       if (dbSettings) {
@@ -359,7 +378,7 @@ export const AppProvider = ({ children }) => {
     syncMongoDB();
     const interval = setInterval(syncMongoDB, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [currentUser]);
 
   // Admin Method to Set Individual User Tone Preference
   const setUserTonePreference = (userKey, toneId) => {

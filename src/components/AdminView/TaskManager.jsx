@@ -38,8 +38,8 @@ export const TaskManager = () => {
     ...registeredUsers.map(u => u.email || u.handle || u.name).filter(Boolean),
     ...(currentUser?.email ? [currentUser.email] : []),
     ...(user?.email ? [user.email] : []),
-    ...proofs.map(p => p.userName || p.userEmail).filter(Boolean)
-  ])).filter(email => email && !email.toLowerCase().includes('admin') && email.toLowerCase() !== 'demo');
+    ...proofs.map(p => p.userEmail || p.userName).filter(Boolean)
+  ])).filter(email => email && email.toLowerCase() !== 'demo');
 
   const memberOptions = [
     { value: 'all', label: '🌐 All Members (Global System Task)' },
