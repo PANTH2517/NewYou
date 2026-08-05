@@ -12,7 +12,15 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI;
+const FALLBACK_ATLAS_URI = 'mongodb+srv://dhggaming49_db_user:Panth_2517@wpdbms.tjvixh1.mongodb.net/NewYou?retryWrites=true&w=majority&appName=WPDBMS';
+
+function getMongoUri() {
+  const envUri = process.env.MONGODB_URI;
+  if (envUri && !envUri.includes('<db_password>') && !envUri.includes('<password>')) {
+    return envUri;
+  }
+  return FALLBACK_ATLAS_URI;
+}
 
 let isConnected = false;
 
@@ -20,18 +28,25 @@ async function connectDB() {
   if (isConnected && mongoose.connection.readyState === 1) {
     return;
   }
-  if (!MONGODB_URI) {
-    throw new Error("MONGODB_URI environment variable is missing.");
-  }
+  const targetUri = getMongoUri();
   try {
-    const db = await mongoose.connect(MONGODB_URI, {
+    const db = await mongoose.connect(targetUri, {
       serverSelectionTimeoutMS: 5000,
     });
     isConnected = db.connections[0].readyState === 1;
     console.log(`⚡ MongoDB Atlas Connected Successfully`);
   } catch (err) {
-    console.error("❌ MongoDB Atlas Connection Error:", err.message);
-    throw err;
+    console.warn(`⚠️ Connection attempt failed with primary URI. Retrying with fallback Atlas URI...`);
+    try {
+      const db = await mongoose.connect(FALLBACK_ATLAS_URI, {
+        serverSelectionTimeoutMS: 5000,
+      });
+      isConnected = db.connections[0].readyState === 1;
+      console.log(`⚡ MongoDB Atlas Connected Successfully via Fallback URI`);
+    } catch (fallbackErr) {
+      console.error("❌ MongoDB Atlas Connection Error:", fallbackErr.message);
+      throw fallbackErr;
+    }
   }
 }
 
