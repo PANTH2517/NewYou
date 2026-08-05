@@ -46,6 +46,7 @@ import {
   apiSaveAdminSettings
 } from '../services/apiService';
 import { XP_LEVELS, MOTIVATIONAL_CATEGORIES, CORE_BADGES, getLevelInfo } from '../constants';
+import { generateUniqueMotivationalMessage } from '../utils/motivationalGenerator';
 
 export { XP_LEVELS, MOTIVATIONAL_CATEGORIES, CORE_BADGES, getLevelInfo };
 
@@ -369,20 +370,18 @@ export const AppProvider = ({ children }) => {
     showToast(`Assigned ${MOTIVATIONAL_CATEGORIES[toneId]?.title || toneId} tone to ${userKey}! ✨`, 'info');
   };
 
-  // Generate Personalized Category Motivational Message for Current User
+  // Generate Procedurally Unique Non-Repeating Motivational Message for Current User
   const triggerMotivationalPopup = () => {
     const userKey = currentUser?.email || user.handle || user.name;
     const assignedToneKey = userTonePreferences[userKey] || userTonePreferences[user.handle] || motivationalCategory || 'hard';
     const categoryConfig = MOTIVATIONAL_CATEGORIES[assignedToneKey] || MOTIVATIONAL_CATEGORIES.hard;
-    const msgList = categoryConfig.messages;
-    const template = msgList[Math.floor(Math.random() * msgList.length)];
     const nameStr = user.name || 'Member';
     const streakStr = Math.max(1, user.streak);
 
-    const formattedMsg = template.replace(/{name}/g, nameStr).replace(/{streak}/g, streakStr);
+    const uniqueMsg = generateUniqueMotivationalMessage(assignedToneKey, nameStr, streakStr);
 
     setStreakModalMessage({
-      message: formattedMsg,
+      message: uniqueMsg,
       category: categoryConfig,
       date: new Date().toLocaleDateString(),
     });
