@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { MOTIVATIONAL_CATEGORIES } from '../../constants';
-import { Sliders, Users, Trash2 } from 'lucide-react';
+import { Sliders, Users, Trash2, Sparkles, CheckCircle2 } from 'lucide-react';
 import { TiltCard } from '../Common/TiltCard';
 
 export const MotivationalManager = () => {
