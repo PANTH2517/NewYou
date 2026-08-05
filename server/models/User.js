@@ -14,6 +14,7 @@ const UserSchema = new mongoose.Schema({
   streak: { type: Number, default: 0 },
   highestStreak: { type: Number, default: 0 },
   lastActiveDate: { type: String, default: null },
+  gender: { type: String, default: 'unspecified' },
   updatedAt: { type: Date, default: Date.now }
 });
 

@@ -29,6 +29,7 @@ export const LoginScreen = () => {
   const [authMode, setAuthMode] = useState('login'); // 'login' | 'register'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [gender, setGender] = useState('unspecified');
   const [errorMessage, setErrorMessage] = useState('');
   const [isApiKeyError, setIsApiKeyError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -68,6 +69,7 @@ export const LoginScreen = () => {
         id: result.user.uid,
         email: result.user.email,
         name: result.user.displayName || result.user.email.split('@')[0],
+        gender: gender,
         role: result.user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user'
       });
     }
@@ -109,6 +111,7 @@ export const LoginScreen = () => {
       email: inputEmail,
       name: inputEmail.split('@')[0],
       handle: `@${inputEmail.split('@')[0]}`,
+      gender: gender,
       role: isAdmin ? 'admin' : 'user'
     };
 
@@ -289,6 +292,36 @@ export const LoginScreen = () => {
               className="w-full px-4 py-3 rounded-xl bg-dark-bg border border-dark-border text-white text-xs focus:outline-none focus:border-cyan-glow"
             />
           </div>
+
+          {authMode === 'register' && (
+            <div>
+              <label className="block text-xs font-bold text-gray-300 mb-1.5 flex items-center space-x-1">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-glow" />
+                <span>Preferred Motivational Gender Persona</span>
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { id: 'male', label: 'Male 👨', sub: 'King / Warrior' },
+                  { id: 'female', label: 'Female 👩', sub: 'Queen / Goddess' },
+                  { id: 'unspecified', label: 'Neutral 👤', sub: 'Champion / Leader' }
+                ].map(opt => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setGender(opt.id)}
+                    className={`py-2 px-2 rounded-xl text-xs font-extrabold border transition-all text-center ${
+                      gender === opt.id
+                        ? 'bg-cyan-glow/20 text-cyan-glow border-cyan-glow shadow-cyan-glow/20'
+                        : 'bg-dark-bg text-gray-400 border-dark-border hover:border-gray-500'
+                    }`}
+                  >
+                    <div>{opt.label}</div>
+                    <div className="text-[9px] opacity-70 font-semibold mt-0.5">{opt.sub}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <button
             type="submit"

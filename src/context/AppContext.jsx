@@ -378,7 +378,8 @@ export const AppProvider = ({ children }) => {
     const nameStr = user.name || 'Member';
     const streakStr = Math.max(1, user.streak);
 
-    const uniqueMsg = generateUniqueMotivationalMessage(assignedToneKey, nameStr, streakStr);
+    const userGender = user.gender || 'unspecified';
+    const uniqueMsg = generateUniqueMotivationalMessage(assignedToneKey, nameStr, streakStr, userGender);
 
     setStreakModalMessage({
       message: uniqueMsg,
