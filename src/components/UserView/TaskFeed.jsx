@@ -154,12 +154,20 @@ export const TaskFeed = () => {
             const progressPercent = Math.min(100, Math.round((task.currentValue / task.targetValue) * 100));
             const isPersonalTask = task.assignedTo && task.assignedTo !== 'all';
 
+            const isApproved = task.proofStatus === 'approved' || (task.completed && !task.requiresProof);
+            const isPending = task.requiresProof && task.proofStatus === 'pending';
+            const isRejected = task.requiresProof && task.proofStatus === 'rejected';
+
             return (
               <div
                 key={task.id}
                 className={`group relative glass-panel rounded-2xl p-5 border transition-all duration-300 ${
-                  task.completed
-                    ? 'border-emerald-neon/40 bg-emerald-neon/5'
+                  isApproved
+                    ? 'border-emerald-neon/60 bg-emerald-neon/10 shadow-emerald-glow opacity-90'
+                    : isPending
+                    ? 'border-amber-500/60 bg-amber-500/10 shadow-amber-500/20'
+                    : isRejected
+                    ? 'border-rose-500/60 bg-rose-500/10 shadow-rose-500/20'
                     : 'border-dark-border hover:border-cyan-glow/50 hover:bg-dark-card/80'
                 }`}
               >
@@ -168,9 +176,13 @@ export const TaskFeed = () => {
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-3.5">
                     <div
-                      className={`w-11 h-11 rounded-2xl flex items-center justify-center border ${
-                        task.completed
-                          ? 'bg-emerald-neon/15 border-emerald-neon text-emerald-neon'
+                      className={`w-11 h-11 rounded-2xl flex items-center justify-center border transition-colors ${
+                        isApproved
+                          ? 'bg-emerald-neon/20 border-emerald-neon text-emerald-neon'
+                          : isPending
+                          ? 'bg-amber-500/20 border-amber-500/60 text-amber-400'
+                          : isRejected
+                          ? 'bg-rose-500/20 border-rose-500/60 text-rose-400'
                           : 'bg-cyan-glow/10 border-cyan-glow/30 text-cyan-glow'
                       }`}
                     >
@@ -179,7 +191,15 @@ export const TaskFeed = () => {
 
                     <div>
                       <div className="flex items-center space-x-2">
-                        <h4 className={`font-bold text-sm ${task.completed ? 'line-through text-gray-400' : 'text-white'}`}>
+                        <h4 className={`font-bold text-sm transition-all ${
+                          isApproved
+                            ? 'line-through text-emerald-300/80 decoration-emerald-400 decoration-2'
+                            : isPending
+                            ? 'text-amber-300'
+                            : isRejected
+                            ? 'text-rose-300'
+                            : 'text-white'
+                        }`}>
                           {task.title}
                         </h4>
                         {isPersonalTask && (
@@ -202,28 +222,28 @@ export const TaskFeed = () => {
                   {/* Proof Status Badge */}
                   {task.requiresProof && (
                     <div className="flex items-center space-x-1">
-                      {task.proofStatus === 'approved' && (
-                        <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-emerald-neon/15 text-emerald-neon border border-emerald-neon/40 text-[10px] font-extrabold">
+                      {isApproved && (
+                        <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-emerald-neon/20 text-emerald-300 border border-emerald-neon/50 text-[10px] font-extrabold shadow-emerald-glow">
                           <ShieldCheck className="w-3 h-3" />
-                          <span>Verified Proof</span>
+                          <span>✓ Verified & Approved</span>
                         </span>
                       )}
-                      {task.proofStatus === 'pending' && (
-                        <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/40 text-[10px] font-extrabold animate-pulse">
+                      {isPending && (
+                        <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/50 text-[10px] font-extrabold animate-pulse">
                           <Clock className="w-3 h-3" />
-                          <span>Review Pending</span>
+                          <span>Pending Admin Review</span>
                         </span>
                       )}
-                      {task.proofStatus === 'rejected' && (
-                        <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-rose-500/15 text-rose-400 border border-rose-500/40 text-[10px] font-extrabold">
+                      {isRejected && (
+                        <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/50 text-[10px] font-extrabold">
                           <AlertCircle className="w-3 h-3" />
-                          <span>Re-upload Req</span>
+                          <span>Rejected • Re-upload</span>
                         </span>
                       )}
                       {task.proofStatus === 'none' && (
                         <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/30 text-[10px] font-bold">
                           <Camera className="w-3 h-3" />
-                          <span>Proof Req</span>
+                          <span>Proof Required</span>
                         </span>
                       )}
                     </div>
@@ -239,18 +259,20 @@ export const TaskFeed = () => {
                 <div className="space-y-1.5 mb-4">
                   <div className="flex justify-between text-xs font-semibold">
                     <span className="text-gray-400">Target Progress</span>
-                    <span className={task.completed ? 'text-emerald-neon font-bold' : 'text-cyan-glow'}>
-                      {task.currentValue} / {task.targetValue} {task.unit} ({progressPercent}%)
+                    <span className={isApproved ? 'text-emerald-neon font-bold' : isPending ? 'text-amber-400' : 'text-cyan-glow'}>
+                      {isApproved ? task.targetValue : task.currentValue} / {task.targetValue} {task.unit} ({isApproved ? 100 : progressPercent}%)
                     </span>
                   </div>
                   <div className="w-full h-2 rounded-full bg-dark-bg overflow-hidden border border-dark-border">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
-                        task.completed
+                        isApproved
                           ? 'bg-gradient-to-r from-emerald-neon to-cyan-glow'
+                          : isPending
+                          ? 'bg-gradient-to-r from-amber-500 to-amber-300'
                           : 'bg-gradient-to-r from-cyan-glow to-orange-fire'
                       }`}
-                      style={{ width: `${progressPercent}%` }}
+                      style={{ width: `${isApproved ? 100 : progressPercent}%` }}
                     />
                   </div>
                 </div>
@@ -277,22 +299,27 @@ export const TaskFeed = () => {
 
                   {task.requiresProof ? (
                     <button
-                      onClick={() => setActiveUploadTask(task)}
+                      onClick={() => !isApproved && setActiveUploadTask(task)}
+                      disabled={isApproved}
                       className={`flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm ${
-                        task.completed && task.proofStatus === 'approved'
-                          ? 'bg-dark-card text-emerald-neon border border-emerald-neon/30'
-                          : task.proofStatus === 'pending'
+                        isApproved
+                          ? 'bg-emerald-neon/20 text-emerald-300 border border-emerald-neon/40 cursor-default font-extrabold'
+                          : isPending
                           ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30'
+                          : isRejected
+                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30'
                           : 'bg-gradient-to-r from-cyan-glow to-cyan-accent text-dark-bg hover:shadow-cyan-glow font-extrabold'
                       }`}
                     >
                       <Camera className="w-3.5 h-3.5" />
                       <span>
-                        {task.proofStatus === 'pending'
-                          ? 'Update Proof'
-                          : task.completed
-                          ? 'View Proof'
-                          : 'Complete & Upload'}
+                        {isApproved
+                          ? '✓ Completed & Verified'
+                          : isPending
+                          ? 'Submitted (Pending Review)'
+                          : isRejected
+                          ? 'Re-upload Photo Proof'
+                          : 'Submit Proof'}
                       </span>
                     </button>
                   ) : (

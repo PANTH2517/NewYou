@@ -687,7 +687,7 @@ export const AppProvider = ({ children }) => {
     apiSaveProof(newProof);
 
     setTasks(prev =>
-      prev.map(t => (t.id === taskId ? { ...t, proofStatus: 'pending', proofUrl: newProof.imageUrl, completed: true } : t))
+      prev.map(t => (t.id === taskId ? { ...t, proofStatus: 'pending', proofUrl: newProof.imageUrl, completed: false } : t))
     );
 
     setAdminStats(prev => ({
@@ -695,10 +695,7 @@ export const AppProvider = ({ children }) => {
       pendingVerifications: prev.pendingVerifications + 1,
     }));
 
-    triggerConfetti();
-    addXP(targetTask.points);
-    checkAndUpdateStreak();
-    triggerMotivationalPopup();
+    showToast('Photo proof submitted! Pending Admin Verification.', 'info');
     setActiveUploadTask(null);
   };
 
@@ -715,7 +712,7 @@ export const AppProvider = ({ children }) => {
     checkAndUpdateStreak();
 
     setTasks(prev =>
-      prev.map(t => (t.id === targetProof.taskId ? { ...t, proofStatus: 'approved', completed: true } : t))
+      prev.map(t => (t.id === targetProof.taskId ? { ...t, proofStatus: 'approved', completed: true, currentValue: t.targetValue } : t))
     );
 
     setAdminStats(prev => ({
