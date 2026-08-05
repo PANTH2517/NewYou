@@ -99,9 +99,4 @@ export const apiSaveAdminSettings = async (settings) => {
   });
 };
 
-// RESET SYSTEM DATABASE
-export const apiResetSystem = async () => {
-  return await fetchJson('/system/reset', {
-    method: 'POST'
-  });
-};
+

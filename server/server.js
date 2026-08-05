@@ -240,18 +240,7 @@ app.put(['/api/admin/settings', '/admin/settings'], async (req, res) => {
   }
 });
 
-// Reset System Database Endpoint
-app.post('/api/system/reset', async (req, res) => {
-  try {
-    await Task.deleteMany({});
-    await Proof.deleteMany({});
-    await User.deleteMany({});
-    await AdminSettings.deleteMany({});
-    res.json({ success: true, message: 'Database wiped clean' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+
 
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
   app.listen(PORT, () => {

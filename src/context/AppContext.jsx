@@ -43,8 +43,7 @@ import {
   apiSaveUser,
   apiDeleteUser,
   apiFetchAdminSettings,
-  apiSaveAdminSettings,
-  apiResetSystem
+  apiSaveAdminSettings
 } from '../services/apiService';
 import { XP_LEVELS, MOTIVATIONAL_CATEGORIES, CORE_BADGES, getLevelInfo } from '../constants';
 
@@ -777,26 +776,7 @@ export const AppProvider = ({ children }) => {
     showToast('Habit deleted from system by Admin.', 'info');
   };
 
-  // Clear Database & Reset All Data (MongoDB Atlas + Local State)
-  const clearAllData = async () => {
-    await apiResetSystem();
 
-    localStorage.removeItem('newself_user');
-    localStorage.removeItem('newself_tasks');
-    localStorage.removeItem('newself_proofs');
-    localStorage.removeItem('newself_badges');
-    localStorage.removeItem('newself_user_tones');
-    localStorage.removeItem('newself_task_completions');
-    localStorage.removeItem('newself_global_tone');
-
-    setTasks([]);
-    setProofs([]);
-    setRegisteredUsers([]);
-    setBadges(CORE_BADGES);
-    setTaskCompletions({});
-    setUserTonePreferences({});
-    showToast('MongoDB Atlas database & system wiped clean!', 'info');
-  };
 
   // Calculate overall progress
   const completedCount = tasks.filter(t => t.completed).length;
@@ -854,9 +834,7 @@ export const AppProvider = ({ children }) => {
         approveProof,
         rejectProof,
         addNewTask,
-        updateTask,
         deleteTask,
-        clearAllData,
         registerUserInMongoDB,
         dailyProgressPercent,
         completedCount,

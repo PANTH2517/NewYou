@@ -1,10 +1,10 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { Shield, Activity, CheckCircle2, Clock, Trash2 } from 'lucide-react';
+import { Shield, Activity, CheckCircle2, Clock } from 'lucide-react';
 import { TiltCard } from '../Common/TiltCard';
 
 export const UserOverview = () => {
-  const { adminStats, tasks, clearAllData } = useApp();
+  const { adminStats, tasks } = useApp();
 
   const totalTasks = tasks.length;
   const totalPoints = tasks.reduce((sum, t) => sum + t.points, 0);
@@ -12,7 +12,7 @@ export const UserOverview = () => {
   return (
     <div className="space-y-6">
       
-      {/* Header Bar with Database Reset Action */}
+      {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h3 className="text-xl font-display font-extrabold text-white flex items-center space-x-2">
@@ -25,19 +25,6 @@ export const UserOverview = () => {
             Real-time analytics for system habits, pending reviews, verified proofs, and database state.
           </p>
         </div>
-
-        <button
-          onClick={() => {
-            if (window.confirm("Are you sure you want to clear the entire database? All tasks, proofs, and stats will be reset.")) {
-              clearAllData();
-            }
-          }}
-          className="px-4 py-2 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-400 hover:bg-rose-500/25 font-extrabold text-xs transition-all flex items-center space-x-2 self-start sm:self-auto"
-          title="Reset All Local Storage Data"
-        >
-          <Trash2 className="w-4 h-4" />
-          <span>Wipe Database & Reset System</span>
-        </button>
       </div>
 
       {/* Telemetry Headline Cards */}
