@@ -15,6 +15,7 @@ export const MotivationalManager = () => {
     registeredUsers,
     deleteUser,
     proofs,
+    ADMIN_EMAIL,
     showToast
   } = useApp();
 
@@ -42,8 +43,14 @@ export const MotivationalManager = () => {
     rawKeys.map(k => emailMap[k.toLowerCase()] || k.toLowerCase())
   )).filter(key => {
     const keyLower = String(key).toLowerCase().trim();
+    const adminEmailLower = (ADMIN_EMAIL || 'admin@newyou.com').toLowerCase();
+    const userRole = registeredUsers.find(u => u.email?.toLowerCase() === keyLower)?.role;
+
     return (
       Boolean(keyLower) &&
+      keyLower !== adminEmailLower &&
+      userRole !== 'admin' &&
+      keyLower !== 'admin commander' &&
       keyLower !== 'demo' &&
       keyLower !== '@member' &&
       keyLower !== 'example@google.com' &&
