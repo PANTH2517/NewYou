@@ -260,121 +260,133 @@ export const TaskManager = () => {
 
       {/* Admin Task Creation / Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-bg/85 backdrop-blur-xl animate-fadeIn">
-          <div className="relative w-full max-w-lg glass-panel rounded-3xl border border-dark-border/90 p-6 sm:p-8 shadow-2xl">
-            <div className="flex items-center justify-between pb-4 border-b border-dark-border mb-6">
-              <h3 className="text-xl font-display font-extrabold text-white">
-                {editingTask ? 'Edit System Habit (Admin)' : 'Create System Habit (Admin)'}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-bg/85 backdrop-blur-xl animate-fadeIn overflow-y-auto">
+          <div className="relative w-full max-w-2xl glass-panel rounded-3xl border border-dark-border/90 p-6 sm:p-8 shadow-2xl my-auto max-h-[90vh] flex flex-col">
+            
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-dark-border mb-5 shrink-0">
+              <h3 className="text-xl font-display font-extrabold text-white flex items-center space-x-2">
+                <span>{editingTask ? 'Edit System Habit' : 'Create System Habit'}</span>
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-cyan-glow/15 text-cyan-glow border border-cyan-glow/30">
+                  Admin Panel
+                </span>
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-2 rounded-full bg-dark-card border border-dark-border text-gray-400 hover:text-white"
+                className="p-2 rounded-full bg-dark-card border border-dark-border text-gray-400 hover:text-white transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-300 mb-1">Habit Title</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="e.g. Hit 10,000 Steps Daily or Read 30 Mins"
-                  className="w-full px-4 py-2.5 rounded-xl bg-dark-bg border border-dark-border text-white text-xs focus:outline-none focus:border-orange-fire"
-                />
+            {/* Scrollable Form Body */}
+            <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto pr-1">
+              
+              {/* Row 1: Habit Title & Assign To (2 columns) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-300 mb-1">Habit Title</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    placeholder="e.g. Hit 10,000 Steps Daily"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-dark-bg border border-dark-border text-white text-xs focus:outline-none focus:border-orange-fire"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-orange-fire mb-1 flex items-center space-x-1">
+                    <User className="w-3.5 h-3.5" />
+                    <span>Assign To Member</span>
+                  </label>
+                  <select
+                    value={formData.assignedTo}
+                    onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
+                    className="w-full px-3 py-2.5 rounded-xl bg-dark-bg border border-orange-fire/50 text-white text-xs font-bold focus:outline-none focus:border-orange-fire cursor-pointer"
+                  >
+                    {memberOptions.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              {/* Assign To Member Dropdown */}
-              <div>
-                <label className="block text-xs font-bold text-orange-fire mb-1 flex items-center space-x-1">
-                  <User className="w-3.5 h-3.5" />
-                  <span>Assign To Specific Member or All Members</span>
-                </label>
-                <select
-                  value={formData.assignedTo}
-                  onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-dark-bg border border-orange-fire/50 text-white text-xs font-bold focus:outline-none focus:border-orange-fire"
-                >
-                  {memberOptions.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+              {/* Row 2: Difficulty Tier & Schedule Frequency (2 columns) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-3.5 rounded-xl bg-dark-bg border border-dark-border">
+                  <label className="block text-xs font-bold text-cyan-glow mb-1 flex items-center space-x-1">
+                    <Flame className="w-3.5 h-3.5" />
+                    <span>Difficulty Tier (XP Reward)</span>
+                  </label>
+                  <select
+                    value={formData.difficulty}
+                    onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-dark-card border border-dark-border text-white text-xs font-bold focus:outline-none focus:border-cyan-glow cursor-pointer"
+                  >
+                    <option value="Easy">🟢 Easy (80 XP Reward)</option>
+                    <option value="Medium">🟡 Medium (120 XP Reward)</option>
+                    <option value="Hard">🔴 Hard (200 XP Reward)</option>
+                    <option value="Extreme">⚡ Extreme / Iron Will (350 XP)</option>
+                  </select>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-dark-bg border border-dark-border">
+                  <label className="block text-xs font-bold text-emerald-400 mb-1 flex items-center space-x-1">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span>Schedule & Frequency</span>
+                  </label>
+                  <select
+                    value={formData.frequency || 'daily'}
+                    onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-dark-card border border-dark-border text-white text-xs font-bold focus:outline-none focus:border-emerald-400 cursor-pointer"
+                  >
+                    <option value="daily">⚡ Daily Routine (Everyday)</option>
+                    <option value="weekly">📅 Weekly Target (Once/Week)</option>
+                    <option value="specific_days">🗓️ Specific Days (Select Days)</option>
+                  </select>
+                </div>
               </div>
 
-              {/* Difficulty Level Selector (Calculates XP dynamically) */}
-              <div className="p-3.5 rounded-xl bg-dark-bg border border-dark-border">
-                <label className="block text-xs font-bold text-cyan-glow mb-1 flex items-center space-x-1">
-                  <Flame className="w-3.5 h-3.5" />
-                  <span>Task Difficulty Tier (Determines XP Reward)</span>
-                </label>
-                <select
-                  value={formData.difficulty}
-                  onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-dark-card border border-dark-border text-white text-xs font-bold focus:outline-none focus:border-cyan-glow"
-                >
-                  <option value="Easy">🟢 Easy (80 XP Reward)</option>
-                  <option value="Medium">🟡 Medium (120 XP Reward)</option>
-                  <option value="Hard">🔴 Hard (200 XP Reward)</option>
-                  <option value="Extreme">⚡ Extreme / Iron Will (350 XP Reward)</option>
-                </select>
-              </div>
-
-              {/* Schedule & Frequency Selector */}
-              <div className="p-3.5 rounded-xl bg-dark-bg border border-dark-border space-y-2">
-                <label className="block text-xs font-bold text-emerald-400 flex items-center space-x-1">
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span>Task Schedule & Frequency</span>
-                </label>
-                <select
-                  value={formData.frequency || 'daily'}
-                  onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-dark-card border border-dark-border text-white text-xs font-bold focus:outline-none focus:border-emerald-400"
-                >
-                  <option value="daily">⚡ Daily Routine (Every Single Day)</option>
-                  <option value="weekly">📅 Weekly Target (Once per Week)</option>
-                  <option value="specific_days">🗓️ Specific Days (Selected Days of Week)</option>
-                </select>
-
-                {formData.frequency === 'specific_days' && (
-                  <div className="pt-2">
-                    <label className="block text-[11px] font-bold text-gray-300 mb-1.5">Select Active Days:</label>
-                    <div className="flex flex-wrap gap-1.5">
-                      {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => {
-                        const isSelected = (formData.selectedDays || []).includes(day);
-                        return (
-                          <button
-                            key={day}
-                            type="button"
-                            onClick={() => {
-                              const curr = formData.selectedDays || [];
-                              const next = isSelected ? curr.filter(d => d !== day) : [...curr, day];
-                              setFormData({ ...formData, selectedDays: next });
-                            }}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-black border transition-all ${
-                              isSelected
-                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-emerald-500/20'
-                                : 'bg-dark-card text-gray-400 border-dark-border hover:border-gray-500'
-                            }`}
-                          >
-                            {day}
-                          </button>
-                        );
-                      })}
-                    </div>
+              {/* Conditional Specific Days Pills */}
+              {formData.frequency === 'specific_days' && (
+                <div className="p-3 rounded-xl bg-dark-bg border border-emerald-500/30">
+                  <label className="block text-[11px] font-bold text-emerald-300 mb-2">Select Active Routine Days:</label>
+                  <div className="flex flex-wrap gap-2">
+                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => {
+                      const isSelected = (formData.selectedDays || []).includes(day);
+                      return (
+                        <button
+                          key={day}
+                          type="button"
+                          onClick={() => {
+                            const curr = formData.selectedDays || [];
+                            const next = isSelected ? curr.filter(d => d !== day) : [...curr, day];
+                            setFormData({ ...formData, selectedDays: next });
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-black border transition-all ${
+                            isSelected
+                              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-emerald-500/20'
+                              : 'bg-dark-card text-gray-400 border-dark-border hover:border-gray-500'
+                          }`}
+                        >
+                          {day}
+                        </button>
+                      );
+                    })}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
+              {/* Row 3: Category & Icon Symbol (2 columns) */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-300 mb-1">Category</label>
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl bg-dark-bg border border-dark-border text-white text-xs focus:outline-none focus:border-orange-fire"
+                    className="w-full px-3 py-2.5 rounded-xl bg-dark-bg border border-dark-border text-white text-xs focus:outline-none focus:border-orange-fire cursor-pointer"
                   >
                     <option value="Fitness">Fitness</option>
                     <option value="Nutrition">Nutrition</option>
@@ -388,7 +400,7 @@ export const TaskManager = () => {
                   <select
                     value={formData.icon}
                     onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-xl bg-dark-bg border border-dark-border text-white text-xs focus:outline-none focus:border-orange-fire"
+                    className="w-full px-3 py-2.5 rounded-xl bg-dark-bg border border-dark-border text-white text-xs focus:outline-none focus:border-orange-fire cursor-pointer"
                   >
                     {AVAILABLE_ICONS.map(ico => (
                       <option key={ico} value={ico}>{ico}</option>
@@ -397,9 +409,10 @@ export const TaskManager = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              {/* Row 4: Target Value & Unit (2 columns) */}
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-300 mb-1">Target Threshold / Steps</label>
+                  <label className="block text-xs font-bold text-gray-300 mb-1">Target Threshold</label>
                   <input
                     type="number"
                     min="1"
@@ -420,44 +433,46 @@ export const TaskManager = () => {
                 </div>
               </div>
 
-              {/* Mandatory Photo Toggle */}
+              {/* Row 5: Mandatory Photo Toggle */}
               <div className="p-3.5 rounded-xl bg-dark-bg border border-dark-border flex items-center justify-between">
                 <div>
                   <div className="text-xs font-bold text-white">Require Photo / Screenshot Proof</div>
-                  <div className="text-[11px] text-gray-400">User must upload proof image</div>
+                  <div className="text-[11px] text-gray-400">User must upload proof image to complete task</div>
                 </div>
                 <input
                   type="checkbox"
                   checked={formData.requiresProof}
                   onChange={(e) => setFormData({ ...formData, requiresProof: e.target.checked })}
-                  className="w-4 h-4 accent-orange-fire cursor-pointer"
+                  className="w-4 h-4 rounded border-gray-600 text-orange-fire focus:ring-orange-fire cursor-pointer"
                 />
               </div>
 
+              {/* Row 6: Description */}
               <div>
                 <label className="block text-xs font-bold text-gray-300 mb-1">Description / Guidelines</label>
                 <textarea
                   rows="2"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="e.g. Upload smartwatch screenshot."
-                  className="w-full px-3 py-2 rounded-xl bg-dark-bg border border-dark-border text-white text-xs focus:outline-none focus:border-orange-fire"
+                  placeholder="e.g. Upload smartwatch screenshot showing 10k steps."
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-dark-bg border border-dark-border text-white text-xs focus:outline-none focus:border-orange-fire"
                 />
               </div>
 
-              <div className="pt-3 flex items-center justify-end space-x-3">
+              {/* Submit Buttons */}
+              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-dark-border shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-dark-border text-gray-400 hover:text-white text-xs font-bold"
+                  className="px-4 py-2.5 rounded-xl bg-dark-card border border-dark-border text-gray-300 hover:text-white font-bold text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-fire to-amber-500 text-white font-extrabold text-xs shadow-orange-glow"
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-orange-fire to-amber-500 text-dark-bg font-extrabold text-xs hover:shadow-orange-fire transition-all"
                 >
-                  {editingTask ? 'Save Habit Changes' : 'Create System Habit'}
+                  {editingTask ? 'Save Changes' : 'Create Habit'}
                 </button>
               </div>
             </form>
