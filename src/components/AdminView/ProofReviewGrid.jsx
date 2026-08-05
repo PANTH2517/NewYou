@@ -20,6 +20,44 @@ const PRESET_FALLBACK_SVG = `data:image/svg+xml;utf8,${encodeURIComponent(`
 </svg>
 `)}`;
 
+const formatTimeAgo = (timestamp) => {
+  if (!timestamp) return 'Just now';
+
+  let date;
+  if (typeof timestamp === 'number') {
+    date = new Date(timestamp);
+  } else if (typeof timestamp === 'string') {
+    if (!isNaN(Number(timestamp))) {
+      date = new Date(Number(timestamp));
+    } else {
+      date = new Date(timestamp);
+    }
+  } else if (timestamp instanceof Date) {
+    date = timestamp;
+  }
+
+  if (!date || isNaN(date.getTime())) {
+    return String(timestamp);
+  }
+
+  const now = new Date();
+  const secondsAgo = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (secondsAgo < 45) return 'Just now';
+  if (secondsAgo < 90) return '1 min ago';
+
+  const minutesAgo = Math.floor(secondsAgo / 60);
+  if (minutesAgo < 60) return `${minutesAgo} mins ago`;
+
+  const hoursAgo = Math.floor(minutesAgo / 60);
+  if (hoursAgo < 24) return `${hoursAgo} ${hoursAgo === 1 ? 'hour' : 'hours'} ago`;
+
+  const daysAgo = Math.floor(hoursAgo / 24);
+  if (daysAgo < 7) return `${daysAgo} ${daysAgo === 1 ? 'day' : 'days'} ago`;
+
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+};
+
 export const ProofReviewGrid = () => {
   const { proofs, approveProof, rejectProof, deleteProof } = useApp();
   const [filterStatus, setFilterStatus] = useState('pending'); // 'pending' | 'approved' | 'rejected' | 'all'
@@ -97,7 +135,7 @@ export const ProofReviewGrid = () => {
                         <div className="font-extrabold text-sm text-white">{proof.userName}</div>
                         <div className="text-[11px] text-gray-400 font-medium flex items-center space-x-1">
                           <Clock className="w-3 h-3 text-cyan-glow" />
-                          <span>{proof.submittedAt}</span>
+                          <span>{formatTimeAgo(proof.submittedAt || proof.createdAt)}</span>
                         </div>
                       </div>
                     </div>
