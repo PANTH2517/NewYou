@@ -2,6 +2,7 @@ import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
+import { MobileNav } from './components/MobileNav';
 import { LoginScreen } from './components/AuthModal';
 import { StreakBanner } from './components/UserView/StreakBanner';
 import { TaskFeed } from './components/UserView/TaskFeed';
@@ -45,7 +46,7 @@ const MainContent = () => {
       <div className="flex flex-1 max-w-7xl w-full mx-auto">
         <Sidebar />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-full overflow-hidden">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-full overflow-hidden pb-24 md:pb-8">
           
           {/* USER VIEW */}
           {role === 'user' && (
@@ -112,9 +113,10 @@ const MainContent = () => {
         </main>
       </div>
 
-      {/* Global Modals */}
+      {/* Global Modals & Mobile Navigation */}
       <ProofUploadModal />
       <StreakMessageModal />
+      <MobileNav />
 
       {/* Toast Notification Container */}
       {toastMessage && (
