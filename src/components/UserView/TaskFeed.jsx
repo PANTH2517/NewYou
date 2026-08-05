@@ -1,7 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { 
-  CheckCircle2, 
   Circle, 
   Camera, 
   Footprints, 
@@ -13,11 +12,9 @@ import {
   Zap, 
   Clock, 
   Check, 
-  Sparkles,
   ShieldCheck,
   AlertCircle,
   User,
-  Flame,
   Calendar
 } from 'lucide-react';
 

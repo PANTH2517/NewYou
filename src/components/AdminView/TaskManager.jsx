@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { DIFFICULTY_XP_MAP } from '../../mockData';
-import { Plus, Trash2, Edit2, Footprints, Utensils, Droplets, BookOpen, Brain, Code, Zap, Camera, Shield, Check, X, User, Flame, Calendar } from 'lucide-react';
+import { Plus, Trash2, Edit2, Footprints, Utensils, Droplets, BookOpen, Brain, Code, Zap, Camera, X, User, Flame, Calendar } from 'lucide-react';
 import { TiltCard } from '../Common/TiltCard';
 
 const ICON_MAP = {
