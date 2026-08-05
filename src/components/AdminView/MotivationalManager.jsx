@@ -54,9 +54,11 @@ export const MotivationalManager = () => {
     return (
       Boolean(key) && 
       !keyLower.includes('admin') && 
+      !keyLower.includes('example') &&
+      !keyLower.includes('demo') &&
       keyLower !== 'admin commander' &&
       keyLower !== '@admin' &&
-      keyLower !== 'demo' &&
+      keyLower !== '@member' &&
       (hasTonePref || !isDeletedFromRegistered)
     );
   });
