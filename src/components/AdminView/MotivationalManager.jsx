@@ -41,25 +41,13 @@ export const MotivationalManager = () => {
   const dynamicMemberKeys = Array.from(new Set(
     rawKeys.map(k => emailMap[k.toLowerCase()] || k.toLowerCase())
   )).filter(key => {
-    const keyLower = String(key).toLowerCase();
-    // Verify key exists in registeredUsers, userTonePreferences, proofs or currentUser
-    const isDeletedFromRegistered = registeredUsers.length > 0 && !registeredUsers.some(u => 
-      u.email?.toLowerCase() === keyLower || 
-      u.name?.toLowerCase() === keyLower || 
-      u.handle?.toLowerCase() === keyLower ||
-      u.id?.toLowerCase() === keyLower
-    );
-    const hasTonePref = Boolean(userTonePreferences[key] || userTonePreferences[keyLower]);
-
+    const keyLower = String(key).toLowerCase().trim();
     return (
-      Boolean(key) && 
-      !keyLower.includes('admin') && 
-      !keyLower.includes('example') &&
-      !keyLower.includes('demo') &&
-      keyLower !== 'admin commander' &&
-      keyLower !== '@admin' &&
+      Boolean(keyLower) &&
+      keyLower !== 'demo' &&
       keyLower !== '@member' &&
-      (hasTonePref || !isDeletedFromRegistered)
+      keyLower !== 'example@google.com' &&
+      keyLower !== 'example@gmail.com'
     );
   });
 
